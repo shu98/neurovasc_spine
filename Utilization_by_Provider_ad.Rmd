@@ -1,0 +1,826 @@
+---
+title: "Utilization   by Provider"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+
+
+```{r, echo=FALSE}
+# Import braries
+library(ggplot2)
+library(multcomp)
+library(dplyr)
+library(forcats)
+library(reshape2)
+library(ggrepel)
+library(gridExtra)
+library(pixiedust)
+
+
+
+```
+
+
+
+```{r, echo=FALSE}
+# Create dataframes for each year
+
+# Set Directory to folders storing Utilization Data
+setwd("/Volumes/Extreme SSD/Spine Group/Digiorgio/CMS Non surgeons perfoming fusions/Utilization_by_Provider/Provider_Data")
+
+# 2021 checked, rendered well on shortened df
+utilization_21_raw_df <- read.csv("Medicare_Physician_Other_Practitioners_by_Provider_and_Service_2021.csv")
+utilization_21_raw_df <- subset(utilization_21_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI ))
+utilization_21_raw_df$HCPCS_Cd <- as.factor(utilization_21_raw_df$HCPCS_Cd)
+utilization_21_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_21_raw_df$Rndrng_Prvdr_Type)
+utilization_21_raw_df$Tot_Srvcs <- as.double(utilization_21_raw_df$Tot_Srvcs)
+utilization_21_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_21_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_21_raw_df$Tot_Srvcs_Spend <- utilization_21_raw_df$Tot_Srvcs * utilization_21_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_21_raw_df$Rndrng_NPI <- as.integer(utilization_21_raw_df$Rndrng_NPI)
+utilization_21_year_df <- data.frame(Year=2021, utilization_21_raw_df)
+
+# 2020 checked, rendered well on shortened df
+utilization_20_raw_df <- read.csv("Medicare_Physician_Other_Practitioners_by_Provider_and_Service_2020.csv")
+utilization_20_raw_df <- subset(utilization_20_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI  ))
+utilization_20_raw_df$HCPCS_Cd <- as.factor(utilization_20_raw_df$HCPCS_Cd)
+utilization_20_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_20_raw_df$Rndrng_Prvdr_Type)
+utilization_20_raw_df$Tot_Srvcs <- as.double(utilization_20_raw_df$Tot_Srvcs)
+utilization_20_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_20_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_20_raw_df$Tot_Srvcs_Spend <- utilization_20_raw_df$Tot_Srvcs * utilization_20_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_20_raw_df$Rndrng_NPI <- as.integer(utilization_20_raw_df$Rndrng_NPI)
+utilization_20_year_df <- data.frame(Year=2020, utilization_20_raw_df)
+
+# 2019 checked, rendered well on shortened df
+utilization_19_raw_df <- read.csv("Medicare_Physician_Other_Practitioners_by_Provider_and_Service_2019.csv")
+utilization_19_raw_df <- subset(utilization_19_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI  ))
+utilization_19_raw_df$HCPCS_Cd <- as.factor(utilization_19_raw_df$HCPCS_Cd)
+utilization_19_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_19_raw_df$Rndrng_Prvdr_Type)
+utilization_19_raw_df$Tot_Srvcs <- as.double(utilization_19_raw_df$Tot_Srvcs)
+utilization_19_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_19_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_19_raw_df$Tot_Srvcs_Spend <- utilization_19_raw_df$Tot_Srvcs * utilization_19_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_19_raw_df$Rndrng_NPI <- as.integer(utilization_19_raw_df$Rndrng_NPI)
+utilization_19_year_df <- data.frame(Year=2019, utilization_19_raw_df)
+
+# 2018  checked, rendered well on shortened df
+utilization_18_raw_df <- read.csv("MUP_PHY_R20_P04_V10_D18_Prov_Svc_zip.csv")
+utilization_18_raw_df <- subset(utilization_18_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI  ))
+utilization_18_raw_df$HCPCS_Cd <- as.factor(utilization_18_raw_df$HCPCS_Cd)
+utilization_18_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_18_raw_df$Rndrng_Prvdr_Type)
+utilization_18_raw_df$Tot_Srvcs <- as.double(utilization_18_raw_df$Tot_Srvcs)
+utilization_18_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_18_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_18_raw_df$Tot_Srvcs_Spend <- utilization_18_raw_df$Tot_Srvcs * utilization_18_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_18_raw_df$Rndrng_NPI <- as.integer(utilization_18_raw_df$Rndrng_NPI)
+utilization_18_year_df <- data.frame(Year=2018, utilization_18_raw_df)
+
+# 2017 ** Rendering poorly on short df, rendered well with full df
+utilization_17_raw_df <- read.csv("Medicare_Physician_Other_Practitioners_by_Provider_and_Service_Dataset_2017.csv")
+utilization_17_raw_df <- subset(utilization_17_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI  ))
+utilization_17_raw_df$HCPCS_Cd <- as.factor(utilization_17_raw_df$HCPCS_Cd)
+utilization_17_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_17_raw_df$Rndrng_Prvdr_Type)
+utilization_17_raw_df$Tot_Srvcs <- as.double(utilization_17_raw_df$Tot_Srvcs)
+utilization_17_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_17_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_17_raw_df$Tot_Srvcs_Spend <- utilization_17_raw_df$Tot_Srvcs * utilization_17_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_17_raw_df$Rndrng_NPI <- as.integer(utilization_17_raw_df$Rndrng_NPI)
+utilization_17_year_df <- data.frame(Year=2017, utilization_17_raw_df)
+
+# 2016  checked, rendered well on shortened df
+utilization_16_raw_df <- read.csv("MUP_PHY_R19_P04_V10_D16_Prov_Svc_zip.csv")
+utilization_16_raw_df <- subset(utilization_16_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI  ))
+utilization_16_raw_df$HCPCS_Cd <- as.factor(utilization_16_raw_df$HCPCS_Cd)
+utilization_16_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_16_raw_df$Rndrng_Prvdr_Type)
+utilization_16_raw_df$Tot_Srvcs <- as.double(utilization_16_raw_df$Tot_Srvcs)
+utilization_16_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_16_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_16_raw_df$Tot_Srvcs_Spend <- utilization_16_raw_df$Tot_Srvcs * utilization_16_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_16_raw_df$Rndrng_NPI <- as.integer(utilization_16_raw_df$Rndrng_NPI)
+utilization_16_year_df <- data.frame(Year=2016, utilization_16_raw_df)
+
+# 2015 rendered poorly on short df, rendered well with full df
+utilization_15_raw_df <- read.csv("MUP_PHY_R19_P04_V10_D15_Prov_Svc_zip.csv")
+utilization_15_raw_df <- subset(utilization_15_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI  ))
+utilization_15_raw_df$HCPCS_Cd <- as.factor(utilization_15_raw_df$HCPCS_Cd)
+utilization_15_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_15_raw_df$Rndrng_Prvdr_Type)
+utilization_15_raw_df$Tot_Srvcs <- as.double(utilization_15_raw_df$Tot_Srvcs)
+utilization_15_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_15_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_15_raw_df$Tot_Srvcs_Spend <- utilization_15_raw_df$Tot_Srvcs * utilization_15_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_15_raw_df$Rndrng_NPI <- as.integer(utilization_15_raw_df$Rndrng_NPI)
+utilization_15_year_df <- data.frame(Year=2015, utilization_15_raw_df)
+
+# 2014  checked, rendered well on shortened df
+utilization_14_raw_df <- read.csv("MUP_PHY_R19_P04_V10_D14_Prov_Svc_zip.csv")
+utilization_14_raw_df <- subset(utilization_14_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI ))
+utilization_14_raw_df$HCPCS_Cd <- as.factor(utilization_14_raw_df$HCPCS_Cd)
+utilization_14_raw_df$Rndrng_Prvdr_Type <- as.factor(utilization_14_raw_df$Rndrng_Prvdr_Type)
+utilization_14_raw_df$Tot_Srvcs <- as.double(utilization_14_raw_df$Tot_Srvcs)
+utilization_14_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_14_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_14_raw_df$Tot_Srvcs_Spend <- utilization_14_raw_df$Tot_Srvcs * utilization_14_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_14_raw_df$Rndrng_NPI <- as.integer(utilization_14_raw_df$Rndrng_NPI)
+utilization_14_year_df <- data.frame(Year=2014, utilization_14_raw_df)
+
+# 2013
+utilization_13_raw_df <- read.csv("MUP_PHY_R19_P04_V10_D13_Prov_Svc_zip.csv")
+utilization_13_raw_df <- subset(utilization_13_raw_df, select = c(HCPCS_Cd,Rndrng_Prvdr_Type, Tot_Srvcs, Avg_Mdcr_Stdzd_Amt, Rndrng_NPI  ))
+utilization_13_raw_df$HCPCS_Cd <- as.factor(utilization_13_raw_df$HCPCS_Cd)
+utilization_13_raw_df$Rndrng_Prvdr_Type <- as.character(utilization_13_raw_df$Rndrng_Prvdr_Type)
+utilization_13_raw_df$Tot_Srvcs <- as.double(utilization_13_raw_df$Tot_Srvcs)
+utilization_13_raw_df$Avg_Mdcr_Stdzd_Amt <- as.double(utilization_13_raw_df$Avg_Mdcr_Stdzd_Amt)
+utilization_13_raw_df$Tot_Srvcs_Spend <- utilization_13_raw_df$Tot_Srvcs * utilization_13_raw_df$Avg_Mdcr_Stdzd_Amt
+utilization_13_raw_df$Rndrng_NPI <- as.integer(utilization_13_raw_df$Rndrng_NPI)
+utilization_13_year_df <- data.frame(Year=2013, utilization_13_raw_df)
+
+# Join all Rows
+utilization_2021_2013_df <- bind_rows(utilization_21_year_df, utilization_20_year_df,utilization_19_year_df,utilization_18_year_df, utilization_17_year_df, utilization_16_year_df,utilization_15_year_df, utilization_14_year_df,utilization_13_year_df)
+
+
+
+```
+We've made the following data groupings:
+
+SI Joint arthrodesise HCPCS Codes: 27279
+Laminectomy HCPCS Codes: 63047, 63052( note this is not collected in CMS data)
+Spinal Fusion =  PLIF/TLIF  HCPCS Codes: 22630, 22633; ALIF HCPCS Codes: 22558; Spine arthrodesis HCPCS Codes: 22600,22610,22612
+tESI HCPCS Codes: 64483
+Initial PT HCPCS Codes: 97001, 97161, 97162, 97163
+Chiro Manip of 3-4 Seg HCPCS Codes: 98941
+
+```{r, echo=FALSE}
+utilization_2021_2013_df_adjusted<- utilization_2021_2013_df
+utilization_2021_2013_df_adjusted <-  utilization_2021_2013_df_adjusted %>% mutate(HCPCS_Cd=recode(HCPCS_Cd,
+                                                                                                   '22600' = 'Spinal fusion',
+                                                                                                   '22610' = 'Spinal fusion',
+                                                                                                   '22612' = 'Spinal fusion',
+                                                                                                   '27279' = 'SI joint arthrodesis',
+                                                                                                   '63047' = 'Laminectomy',
+                                                                                                   '63052' = 'Laminectomy',
+                                                                                                   '22630' = 'PLIF/TLIF',
+                                                                                                   '22633' = 'Spinal fusion',
+                                                                                                   '22558' = 'Spinal fusion',
+                                                                                                   '64483' = 'tESI',
+                                                                                                   '97001' = 'Initial PT',
+                                                                                                   '97161'='Initial PT',
+                                                                                                  '97162'='Initial PT',
+                                                                                                  '97163'='Initial PT',
+                                                                                                  '98941' = 'Chiro Manip of 3-4 Seg'))
+
+utilization_2021_2013_overview_adjusted <- utilization_2021_2013_df_adjusted %>%  group_by(HCPCS_Cd, Year) %>% 
+  summarise(Sum_Utilization = sum(Tot_Srvcs),
+    Sum_Spend = sum(Tot_Srvcs_Spend),
+    Sum_Provider = length(unique(Rndrng_NPI)),
+            .groups = 'drop')  %>%
+  as.data.frame()
+
+```
+
+```{r, echo=FALSE}
+options(scipen=999)
+
+# Graph 1
+plot_1 <-subset(utilization_2021_2013_overview_adjusted, HCPCS_Cd == 'Laminectomy' | HCPCS_Cd == 'Spinal fusion' | HCPCS_Cd == "SI joint arthrodesis")
+
+ggplot(plot_1, aes(x = Year, y = Sum_Utilization, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Utilization), size = 3) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', "SI joint arthrodesis" = 'orange')) +
+  ylab("Total Utilization") + scale_x_continuous(n.breaks=9)
+
+ggplot(plot_1, aes(x = Year, y = Sum_Spend, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Spend), size = 3) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', "SI joint arthrodesis" = 'orange')) +
+  ylab("Total Expenditure") + scale_x_continuous(n.breaks=9)
+
+# Graph 2 Lami vs Spine arthrodesis vs tESI
+plot_2 <-subset(utilization_2021_2013_overview_adjusted, HCPCS_Cd == 'Laminectomy' | HCPCS_Cd == 'Spinal fusion' | HCPCS_Cd == 'tESI' | HCPCS_Cd == "SI joint arthrodesis")
+
+ggplot(plot_2, aes(x = Year, y = Sum_Utilization, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Utilization), size = 3) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', 'tESI' = 'black', "SI joint arthrodesis" = "orange")) +
+  ylab("Total Utilization") + scale_x_continuous(n.breaks=9)
+
+ggplot(plot_2, aes(x = Year, y = Sum_Spend, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Spend), size = 3) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', 'tESI' = 'black', "SI joint arthrodesis" = "orange")) +
+  ylab("Total Expenditure") + scale_x_continuous(n.breaks=9)
+
+# Graph 3 Lami vs Spine arthrodesis vs. tESI vs. Initial PT
+
+
+plot_3 <-subset(utilization_2021_2013_overview_adjusted, HCPCS_Cd == 'Laminectomy' | HCPCS_Cd == 'Spinal fusion' | HCPCS_Cd == 'tESI' | HCPCS_Cd == 'Initial PT' | HCPCS_Cd == "SI joint arthrodesis")
+
+ggplot(plot_3, aes(x = Year, y = Sum_Utilization, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Utilization), size = 3) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', 'tESI' = 'black', 'Initial PT' = 'green', "SI joint arthrodesis" = 'orange')) +
+  ylab("Total Utilization") +  scale_x_continuous(n.breaks=9)
+
+ggplot(plot_3, aes(x = Year, y = Sum_Spend, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Spend), size = 3) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', 'tESI' = 'black', 'Initial PT' = 'green', "SI joint arthrodesis" = 'orange')) +
+  ylab("Total Expenditure") +  scale_x_continuous(n.breaks=9)
+
+# Graph 4 Lami vs fSpine arthrodesis vs tesi vs intial pt vs chiro
+plot_4 <-subset(utilization_2021_2013_overview_adjusted, HCPCS_Cd == 'Laminectomy' | HCPCS_Cd == 'Spinal fusion' | HCPCS_Cd == 'tESI' | HCPCS_Cd == 'Initial PT' |HCPCS_Cd == 'Chiro Manip of 3-4 Seg'  | HCPCS_Cd == "SI joint arthrodesis" )
+
+ggplot(plot_4, aes(x = Year, y = Sum_Utilization, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', 'tESI' = 'black', 'Initial PT' = 'green','Chiro Manip of 3-4 Seg' = 'purple' , "SI joint arthrodesis" = 'orange')) +
+  ylab("Total Utilization") +  scale_x_continuous(n.breaks=9)
+
+ggplot(plot_4, aes(x = Year, y = Sum_Spend, color = HCPCS_Cd)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Spend), size = 2) +
+  scale_color_manual( name = "HCPCS Codes",
+    values=c('Laminectomy'='blue','Spinal fusion'='red', 'tESI' = 'black', 'Initial PT' = 'green','Chiro Manip of 3-4 Seg' = 'purple' , "SI joint arthrodesis" = 'orange')) +
+  ylab("Total Expenditure") +  scale_x_continuous(n.breaks=9)
+
+```
+
+
+For each code, these next few graphs will depict trends of various sub specialties over time. Here we group Interventional Pain Manangement, Interventional Radiology and Pain Management as Non-surigcal Interventionalsts.
+
+
+
+```{r, echo=FALSE}
+options(scipen=999)
+
+utilization_2021_2013_by_provider_adjusted <- utilization_2021_2013_df_adjusted
+
+# Use mutate and recode to modify the 'Rndrng_Prvdr_Type' column
+utilization_2021_2013_by_provider_adjusted <- utilization_2021_2013_by_provider_adjusted %>%
+  mutate(Rndrng_Prvdr_Type = recode(Rndrng_Prvdr_Type,
+                                    'Interventional Pain Management' = 'Pain Management',
+                                    'Interventional Radiology' = 'Pain Management'))
+         
+utilization_2021_2013_by_provider_adjusted_recoded <- utilization_2021_2013_by_provider_adjusted %>%
+  mutate(Rndrng_Prvdr_Type = recode(Rndrng_Prvdr_Type,
+                                    'Pain Management' = 'Non-surgical Interventionalists'))
+
+# Filter the rows based on specific 'Rndrng_Prvdr_Type' values
+utilization_2021_2013_by_provider_adjusted_subset <- subset(utilization_2021_2013_by_provider_adjusted_recoded,
+                                                    Rndrng_Prvdr_Type %in% c('Neurosurgery', 'Orthopedic Surgery', 'Non-surgical Interventionalists'))
+
+
+utilization_2021_2013_overview_by_provider_adjusted <- utilization_2021_2013_by_provider_adjusted_subset %>%  group_by(HCPCS_Cd, Year, Rndrng_Prvdr_Type) %>% 
+  summarise(Sum_Utilization = sum(Tot_Srvcs),
+  Sum_Spend = sum(Tot_Srvcs_Spend),
+    Sum_Provider = length(unique(Rndrng_NPI)),
+            .groups = 'drop')  %>%
+  as.data.frame()
+
+utilization_13_raw_df$Tot_Srvcs_Spend <- utilization_13_raw_df$Tot_Srvcs * utilization_13_raw_df$Avg_Mdcr_Stdzd_Amt
+
+# Spine arthrodesis (22612) 
+plot_6 <-subset(utilization_2021_2013_overview_by_provider_adjusted, HCPCS_Cd == 'Spinal fusion'  )
+plot_6$CPI <- ifelse(plot_6$Year == "2013",233,
+                     ifelse(plot_6$Year =="2014", 236.7,
+                            ifelse(plot_6$Year =="2015", 237,
+                                   ifelse(plot_6$Year=="2016",240,
+                                          ifelse(plot_6$Year=="2017", 245.1,
+                                                 ifelse(plot_6$Year =="2018", 251.1,
+                                                        ifelse(plot_6$Year=="2019", 255.7,
+                                                               ifelse(plot_6$Year=="2020", 258.8,
+                                                                      ifelse(plot_6$Year=="2021", 271,0)))))))))
+plot_6$Sum_Spend_adjusted<-plot_6$Sum_Spend/plot_6$CPI*271
+
+ggplot(plot_6, aes(x = Year, y = Sum_Utilization,  shape = Rndrng_Prvdr_Type, color= Rndrng_Prvdr_Type)) +
+    scale_shape_manual( name = "Specialty", values=c("Neurosurgery" = 2, "Non-surgical Interventionalists" =8, "Orthopedic Surgery" = 20))+
+    scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Total Utilization") + labs(title = "Spinal Fusion Utilization Trends by Specialty") +  scale_x_continuous(n.breaks=9) +
+    scale_y_continuous(labels = scales::label_number_si()) + theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    axis.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "grey"),
+    panel.grid.minor.y = element_line(color = "grey")
+  )
+
+plot_6$Avg_ut_per_provider <- plot_6$Sum_Utilization/plot_6$Sum_Provider
+ggplot(plot_6, aes(x = Year, y = Avg_ut_per_provider, color = Rndrng_Prvdr_Type)) +
+    scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Utilization per Provider") + labs(title = "Spinal Fusion Utilization per Provider Trends by Specialty") +  scale_x_continuous(n.breaks=9) +
+    scale_y_continuous(labels = scales::label_number_si()) + theme_minimal()
+
+
+plot_6$Avg_Price_per_service_adjusted<-plot_6$Sum_Spend_adjusted/plot_6$Sum_Utilization
+ggplot(plot_6, aes(x = Year, y = Avg_Price_per_service_adjusted, color = Rndrng_Prvdr_Type)) +
+    scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Average Medicare Standardized Payments (in US 2021 dollars)") + labs(title = "Average Medicare Standardized Payment for Spinal Fusion Trends by Specialty") +  scale_x_continuous(n.breaks=9) +
+    scale_y_continuous(labels =  scales::dollar_format()) + theme_minimal(base_size = 13)
+
+
+plot_6$Avg_Price_per_service_adjusted<-plot_6$Sum_Spend_adjusted/plot_6$Sum_Utilization
+ggplot(plot_6, aes(x = Year, y = Avg_Price_per_service_adjusted,  shape = Rndrng_Prvdr_Type, color= Rndrng_Prvdr_Type)) +
+    scale_shape_manual( name = "Specialty", values=c("Neurosurgery" = 2, "Non-surgical Interventionalists" =8, "Orthopedic Surgery" = 20))+
+    scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Average Medicare Standardized Payments (in US 2021 dollars)") + labs(title = "Average Medicare Standardized Payment for Spinal Fusion Trends by Specialty") +  scale_x_continuous(n.breaks=9) +
+    scale_y_continuous(labels =  scales::dollar_format(), limits = c(0,1500)) +  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    axis.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "grey"),
+    panel.grid.minor.y = element_line(color = "grey")
+  )
+
+
+ggplot(plot_6, aes(x = Year, y = Sum_Spend_adjusted, shape = Rndrng_Prvdr_Type, color= Rndrng_Prvdr_Type)) +
+    scale_shape_manual( name = "Specialty", values=c("Neurosurgery" = 2, "Non-surgical Interventionalists" =8, "Orthopedic Surgery" = 20))+
+scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+  #geom_text_repel(aes(label = Sum_Spend), size = 2) +
+  ylab("Total Expenditure (in US 2021 dollars)") + labs(title = "Medicare Payments for Spine Fusions by Specialty") +  scale_x_continuous(n.breaks=9) +
+  scale_y_continuous(labels = scales::dollar_format(scale = .000001, suffix = "M"))+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    axis.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "grey"),
+    panel.grid.minor.y = element_line(color = "grey")
+  )
+
+ggplot(plot_6, aes(x = Year, y = Sum_Provider, color = Rndrng_Prvdr_Type)) +
+  geom_line() +
+  geom_point() +
+  # geom_text_repel(aes(label = Sum_Provider), size = 2) +
+  ylab("Total Unique Providers") + labs(title = "Spine fusion trends over time by specialty") +  scale_x_continuous(n.breaks=9)
+
+
+
+
+
+
+# SI Joint Arthrodesis (27279) 
+plot_7 <-subset(utilization_2021_2013_overview_by_provider_adjusted, HCPCS_Cd == 'SI joint arthrodesis'  )
+
+new_rows <- data.frame(
+  HCPCS_Cd = "SI joint arthrodesis",
+  Rndrng_Prvdr_Type = "Non-surgical Interventionalists",
+  Year = c("2015", "2016", "2017"),
+  Sum_Utilization = 0,
+  Sum_Spend = 0,
+  Sum_Provider = 0
+)
+new_rows$Year<-as.integer(new_rows$Year)
+# Append the new rows to the existing dataframe
+plot_7 <- rbind(plot_7, new_rows)
+plot_7$Sum_Utilization <- ifelse(plot_7$Rndrng_Prvdr_Type=="Non-surgical Interventionalists" & plot_7$Year=="2015", 0,
+                                 ifelse(plot_7$Rndrng_Prvdr_Type=="Non-surgical Interventionalists" & plot_7$Year=="2016", 0,
+                                        ifelse(plot_7$Rndrng_Prvdr_Type=="Non-surgical Interventionalists" & plot_7$Year=="2017", 0, plot_7$Sum_Utilization)))
+plot_7$Sum_Spend <- ifelse(plot_7$Rndrng_Prvdr_Type=="Non-surgical Interventionalists" & plot_7$Year=="2015", 0,
+                                 ifelse(plot_7$Rndrng_Prvdr_Type=="Non-surgical Interventionalists" & plot_7$Year=="2016", 0,
+                                        ifelse(plot_7$Rndrng_Prvdr_Type=="Non-surgical Interventionalists" & plot_7$Year=="2017", 0, plot_7$Sum_Spend)))
+plot_7$CPI <- ifelse(plot_7$Year == "2013",233,
+                     ifelse(plot_7$Year =="2014", 236.7,
+                            ifelse(plot_7$Year =="2015", 237,
+                                   ifelse(plot_7$Year=="2016",240,
+                                          ifelse(plot_7$Year=="2017", 245.1,
+                                                 ifelse(plot_7$Year =="2018", 251.1,
+                                                        ifelse(plot_7$Year=="2019", 255.7,
+                                                               ifelse(plot_7$Year=="2020", 258.8,
+                                                                      ifelse(plot_7$Year=="2021", 271,0)))))))))
+plot_7$Sum_Spend_adjusted<-plot_7$Sum_Spend/plot_7$CPI*271
+plot_7<-subset(plot_7, Year %in% c("2018", "2019", "2020", "2021"))
+plot_7$Year <-as.integer(plot_7$Year)
+
+ggplot(plot_7, aes(x = Year, y = Sum_Utilization,  shape = Rndrng_Prvdr_Type, color=Rndrng_Prvdr_Type)) +
+    scale_shape_manual( name = "Specialty", values=c("Neurosurgery" = 2, "Non-surgical Interventionalists" =8, "Orthopedic Surgery" = 20))+
+  scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Total Utilization") + labs(title = "SI Joint Fusion Utilization Trends by Specialty") +  scale_x_continuous(n.breaks=4) +
+    scale_y_continuous(labels = scales::label_number_si()) + theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    axis.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "grey"),
+    panel.grid.minor.y = element_line(color = "grey")
+  )
+
+
+plot_7$Avg_ut_per_provider<-ifelse(plot_7$Sum_Provider==0,0, plot_7$Sum_Utilization/plot_7$Sum_Provider)
+ggplot(plot_7, aes(x = Year, y = Avg_ut_per_provider, color = Rndrng_Prvdr_Type)) +
+    scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Utilization per Provider") + labs(title = "SI Joint Fusion Utilization per Provider Trends by Specialty") +  scale_x_continuous(n.breaks=9) +
+    scale_y_continuous(labels = scales::label_number_si()) + theme_minimal()
+
+ggplot(plot_7, aes(x = Year, y = Sum_Spend_adjusted,  shape = Rndrng_Prvdr_Type, color=Rndrng_Prvdr_Type)) +
+    scale_shape_manual( name = "Specialty", values=c("Neurosurgery" = 2, "Non-surgical Interventionalists" =8, "Orthopedic Surgery" = 20))+
+  scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+  #geom_text_repel(aes(label = Sum_Spend), size = 2) +
+  ylab("Total Expenditure (in US 2021 dollars)") + labs(title = "Medicare Payments for SI Joint Fusion by Specialty") +  scale_x_continuous(n.breaks=4) +
+  scale_y_continuous(labels = scales::dollar_format(scale = .001, suffix = "K"), limits = c(0, 600000))+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    axis.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "grey"),
+    panel.grid.minor.y = element_line(color = "grey")
+  )
+
+
+plot_7$Avg_Price_per_service_adjusted<-ifelse(plot_7$Sum_Utilization==0,0, plot_7$Sum_Spend_adjusted/plot_7$Sum_Utilization)
+ggplot(plot_7, aes(x = Year, y = Avg_Price_per_service_adjusted, shape = Rndrng_Prvdr_Type, color=Rndrng_Prvdr_Type)) +
+    scale_shape_manual( name = "Specialty", values=c("Neurosurgery" = 2, "Non-surgical Interventionalists" =8, "Orthopedic Surgery" = 20))+
+  scale_color_manual( name = "Specialty", values=c("Neurosurgery" = "red", "Non-surgical Interventionalists" ="green", "Orthopedic Surgery" = "blue"))+
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Average Medicare Standardized Payments (in US 2021 dollars)") + labs(title = "Average Medicare Standardized Payment for SI Joint Fusion Trends by Specialty") +  scale_x_continuous(n.breaks=4) +
+    scale_y_continuous(labels =  scales::dollar_format(), limits=c(0,800) , breaks = seq(0, 800, by = 400)) +theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    axis.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "grey"),
+    panel.grid.minor.y = element_line(color = "grey")
+  )
+
+
+
+
+ggplot(plot_7, aes(x = Year, y = Sum_Provider, color = Rndrng_Prvdr_Type)) +
+  geom_line() +
+  geom_point() +
+ # geom_text_repel(aes(label = Sum_Provider), size = 2) +
+  ylab("Total Unique Providers") + labs(title = "SI joint arthrodesis trends over time by specialty") +  scale_x_continuous(n.breaks=9)
+
+# Total providers
+sum_2018_21 <- subset(plot_7,Year %in% c("2018", "2019", "2020", "2021") )
+sum <- sum_2018_21 %>%
+  group_by(Rndrng_Prvdr_Type) %>%
+  summarise(Period_Providers = sum(Sum_Provider))
+
+print(sum)
+
+```
+Find total percentages
+```{r}
+overall_summary_spine_fusions <- utilization_2021_2013_by_provider_adjusted_recoded[
+  utilization_2021_2013_df_adjusted$HCPCS_Cd == 'Spinal fusion' & 
+  utilization_2021_2013_df_adjusted$Year %in% c(2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021), ]
+# gen_surg_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='General Surgery',]
+# n_gen_surg_spine<-sum(gen_surg_spine$Tot_Srvcs) 
+# amb_surg_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Ambulatory Surgical Center',]
+# n_amb_surg_spine <-sum(amb_surg_spine$Tot_Srvcs) 
+# pa_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Physician Assistant',]
+# n_pa_spine <-sum(pa_spine$Tot_Srvcs) 
+# np_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Nurse Practitioner',]
+# n_np_spine <-sum(np_spine$Tot_Srvcs) 
+# n_spine_fusions_2015_2021 <- sum(overall_summary_spine_fusions$Tot_Srvcs) - n_gen_surg_spine - n_amb_surg_spine - n_pa_spine - n_np_spine
+
+
+overall_summary_spine_fusions_neuro <- overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Neurosurgery',]
+n_spine_fusions_2015_2021_neuro <-sum(overall_summary_spine_fusions_neuro$Tot_Srvcs) 
+
+
+overall_summary_spine_fusions_ortho <- overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Orthopedic Surgery',]
+n_spine_fusions_2015_2021_ortho <-sum(overall_summary_spine_fusions_ortho$Tot_Srvcs)
+
+
+overall_summary_spine_fusions_non_surg <- overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Non-surgical Interventionalists',]
+n_spine_fusions_2015_2021_non_surg <-sum(overall_summary_spine_fusions_non_surg$Tot_Srvcs)
+
+n_spine_fusions_2015_2021 <-n_spine_fusions_2015_2021_neuro+ n_spine_fusions_2015_2021_ortho+n_spine_fusions_2015_2021_non_surg
+
+print("Non-surg overall percent of spine fusions")
+(n_spine_fusions_2015_2021_non_surg/n_spine_fusions_2015_2021)*100
+
+
+print("Neuro overall percent of spine fusions")
+(n_spine_fusions_2015_2021_neuro/n_spine_fusions_2015_2021)*100
+
+print("Ortho overall percent of spine fusions")
+(n_spine_fusions_2015_2021_ortho/n_spine_fusions_2015_2021)*100
+
+
+print("others overall percent of spine fusions")
+(1- ((n_spine_fusions_2015_2021_non_surg+n_spine_fusions_2015_2021_ortho+n_spine_fusions_2015_2021_neuro)/n_spine_fusions_2015_2021))*100
+```
+
+2018-2021
+```{r}
+overall_summary_spine_fusions <- utilization_2021_2013_by_provider_adjusted_recoded[
+  utilization_2021_2013_df_adjusted$HCPCS_Cd == 'Spinal fusion' & 
+  utilization_2021_2013_df_adjusted$Year %in% c(2018, 2019, 2020, 2021), ]
+# gen_surg_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='General Surgery',]
+# n_gen_surg_spine<-sum(gen_surg_spine$Tot_Srvcs) 
+# amb_surg_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Ambulatory Surgical Center',]
+# n_amb_surg_spine <-sum(amb_surg_spine$Tot_Srvcs) 
+# pa_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Physician Assistant',]
+# n_pa_spine <-sum(pa_spine$Tot_Srvcs) 
+# np_spine <-overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Nurse Practitioner',]
+# n_np_spine <-sum(np_spine$Tot_Srvcs) 
+# n_spine_fusions_2015_2021 <- sum(overall_summary_spine_fusions$Tot_Srvcs) - n_gen_surg_spine - n_amb_surg_spine - n_pa_spine - n_np_spine
+
+
+overall_summary_spine_fusions_neuro <- overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Neurosurgery',]
+n_spine_fusions_2015_2021_neuro <-sum(overall_summary_spine_fusions_neuro$Tot_Srvcs) 
+
+
+overall_summary_spine_fusions_ortho <- overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Orthopedic Surgery',]
+n_spine_fusions_2015_2021_ortho <-sum(overall_summary_spine_fusions_ortho$Tot_Srvcs)
+
+
+overall_summary_spine_fusions_non_surg <- overall_summary_spine_fusions[overall_summary_spine_fusions$Rndrng_Prvdr_Type=='Non-surgical Interventionalists',]
+n_spine_fusions_2015_2021_non_surg <-sum(overall_summary_spine_fusions_non_surg$Tot_Srvcs)
+
+n_spine_fusions_2015_2021 <-n_spine_fusions_2015_2021_neuro+ n_spine_fusions_2015_2021_ortho+n_spine_fusions_2015_2021_non_surg
+
+print("Non-surg overall percent of spine fusions")
+(n_spine_fusions_2015_2021_non_surg/n_spine_fusions_2015_2021)*100
+
+
+print("Neuro overall percent of spine fusions")
+(n_spine_fusions_2015_2021_neuro/n_spine_fusions_2015_2021)*100
+
+print("Ortho overall percent of spine fusions")
+(n_spine_fusions_2015_2021_ortho/n_spine_fusions_2015_2021)*100
+
+
+print("others overall percent of spine fusions")
+(1- ((n_spine_fusions_2015_2021_non_surg+n_spine_fusions_2015_2021_ortho+n_spine_fusions_2015_2021_neuro)/n_spine_fusions_2015_2021))*100
+```
+
+
+```{r}
+overall_summary_si_fusions <- utilization_2021_2013_by_provider_adjusted_recoded[
+  utilization_2021_2013_df_adjusted$HCPCS_Cd == 'SI joint arthrodesis' & 
+  utilization_2021_2013_df_adjusted$Year %in% c(2018, 2019, 2020, 2021), ]
+# gen_surg_si <-overall_summary_si_fusions[overall_summary_si_fusions$Rndrng_Prvdr_Type=='General Surgery',]
+# n_gen_surg_si<-sum(gen_surg_si$Tot_Srvcs) 
+# amb_surg_si <-overall_summary_si_fusions[overall_summary_si_fusions$Rndrng_Prvdr_Type=='Ambulatory Surgical Center',]
+# n_amb_surg_si <-sum(amb_surg_si$Tot_Srvcs) 
+# pa_si <-overall_summary_si_fusions[overall_summary_si_fusions$Rndrng_Prvdr_Type=='Physician Assistant',]
+# n_pa_si <-sum(pa_si$Tot_Srvcs) 
+# np_si <-overall_summary_si_fusions[overall_summary_si_fusions$Rndrng_Prvdr_Type=='Nurse Practitioner',]
+# n_np_si <-sum(np_si$Tot_Srvcs) 
+#n_si_fusions_2018_2021 <- sum(overall_summary_si_fusions$Tot_Srvcs) - n_gen_surg_si - n_amb_surg_si - n_pa_si - n_np_si
+
+
+overall_summary_si_fusions_neuro <- overall_summary_si_fusions[overall_summary_si_fusions$Rndrng_Prvdr_Type=='Neurosurgery',]
+n_si_fusions_2018_2021_neuro <-sum(overall_summary_si_fusions_neuro$Tot_Srvcs)
+
+overall_summary_si_fusions_ortho <- overall_summary_si_fusions[overall_summary_si_fusions$Rndrng_Prvdr_Type=='Orthopedic Surgery',]
+n_si_fusions_2018_2021_ortho <-sum(overall_summary_si_fusions_ortho$Tot_Srvcs)
+
+
+overall_summary_si_fusions_non_surg <- overall_summary_si_fusions[overall_summary_si_fusions$Rndrng_Prvdr_Type=='Non-surgical Interventionalists',]
+n_si_fusions_2018_2021_non_surg <-sum(overall_summary_si_fusions_non_surg$Tot_Srvcs)
+
+
+
+n_si_fusions_2018_2021 <- n_si_fusions_2018_2021_neuro+n_si_fusions_2018_2021_ortho+n_si_fusions_2018_2021_non_surg
+
+print("Neuro overall percent of si fusions")
+(n_si_fusions_2018_2021_neuro/n_si_fusions_2018_2021)*100
+
+print("Ortho overall percent of si fusions")
+(n_si_fusions_2018_2021_ortho/n_si_fusions_2018_2021)*100
+
+print("Non-surg overall percent of si fusions")
+(n_si_fusions_2018_2021_non_surg/n_si_fusions_2018_2021)*100
+
+print("others overall percent of si fusions")
+(1- ((n_si_fusions_2018_2021_non_surg+n_si_fusions_2018_2021_ortho+n_si_fusions_2018_2021_neuro)/n_si_fusions_2018_2021))*100
+
+
+# all_spine_util <- overall_summary_spine_fusions %>%  group_by(Rndrng_Prvdr_Type) %>% 
+#   summarise(Sum_Utilization = sum(Tot_Srvcs),
+#             .groups = 'drop')  %>%
+#   as.data.frame() %>%
+#   arrange(desc(Sum_Utilization))
+# all_spine_util
+# 
+# 
+# png("spine_utilization.png", height = 50*nrow(all_spine_util), width = 200*ncol(all_spine_util))
+# grid.table(all_spine_util)
+# dev.off()
+# 
+# 
+# 
+# all_si_util <- overall_summary_si_fusions %>%  group_by(Rndrng_Prvdr_Type) %>% 
+#   summarise(Sum_Utilization = sum(Tot_Srvcs),
+#             .groups = 'drop')  %>%
+#   as.data.frame() %>%
+#   arrange(desc(Sum_Utilization))
+# all_si_util
+# 
+# 
+# png("si_utilization.png", height = 50*nrow(all_si_util), width = 200*ncol(all_si_util))
+# grid.table(all_si_util)
+# dev.off()
+
+
+```
+
+
+New Figures
+```{r}
+# Provider Analysis
+
+SI_set <- subset(utilization_2021_2013_by_provider_adjusted_subset, 
+                 Year %in% c("2018", "2019", "2020", "2021") & 
+                 HCPCS_Cd %in% c("SI joint arthrodesis"))
+
+#summary of unique providers _ neuro
+SI_set_neuro <-subset(SI_set,Rndrng_Prvdr_Type=="Neurosurgery" )
+#total providers in the period
+length(unique(SI_set_neuro$Rndrng_NPI))
+
+SI_set_neuro_sum <- SI_set_neuro %>%
+  group_by(Year) %>%
+  summarize(Sum_Provider = length(unique(Rndrng_NPI)))
+
+summary(SI_set_neuro_sum)
+
+#summary of unique providers _ ortho
+SI_set_ortho<-subset(SI_set,Rndrng_Prvdr_Type=="Orthopedic Surgery" )
+#total providers in the period
+length(unique(SI_set_ortho$Rndrng_NPI))
+
+SI_set_ortho_sum <- SI_set_ortho %>%
+  group_by(Year) %>%
+  summarize(Sum_Provider = length(unique(Rndrng_NPI)))
+
+summary(SI_set_ortho_sum)
+
+#summary of unique providers _ other
+SI_set_other<-subset(SI_set,Rndrng_Prvdr_Type=="Non-surgical Interventionalists" )
+#total providers in the period
+length(unique(SI_set_other$Rndrng_NPI))
+
+SI_set_other_sum <- SI_set_other %>%
+  group_by(Year) %>%
+  summarize(Sum_Provider = length(unique(Rndrng_NPI)))
+
+summary(SI_set_other_sum)
+
+Si_set_2021 <- subset(SI_set, Year=="2021")
+summary(aov(Si_set_2021$Avg_Mdcr_Stdzd_Amt~Si_set_2021$Rndrng_Prvdr_Type))
+summary(aov(Si_set_2021$Tot_Srvcs~Si_set_2021$Rndrng_Prvdr_Type))
+
+summary(lm(log(Tot_Srvcs_Spend)~Year+Rndrng_Prvdr_Type ,data=SI_set))
+
+
+spinal_set <- subset(utilization_2021_2013_by_provider_adjusted_subset, 
+                 Year %in% c("2013","2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021") & 
+                 HCPCS_Cd %in% c("Spinal fusion"))
+#summary of unique providers _ neuro
+spinal_set_neuro<-subset(spinal_set,Rndrng_Prvdr_Type=="Neurosurgery" )
+#total providers in the period
+length(unique(spinal_set_neuro$Rndrng_NPI))
+
+spinal_set_neuro_sum <- spinal_set_neuro %>%
+  group_by(Year) %>%
+  summarize(Sum_Provider = length(unique(Rndrng_NPI)))
+
+summary(spinal_set_neuro_sum)
+
+
+#summary of unique providers _ ortho
+spinal_set_ortho<-subset(spinal_set,Rndrng_Prvdr_Type=="Orthopedic Surgery" )
+#total providers in the period
+length(unique(spinal_set_ortho$Rndrng_NPI))
+
+spinal_set_ortho_sum <- spinal_set_ortho %>%
+  group_by(Year) %>%
+  summarize(Sum_Provider = length(unique(Rndrng_NPI)))
+
+summary(spinal_set_ortho_sum)
+
+#summary of unique providers _ other
+spinal_set_other<-subset(spinal_set,Rndrng_Prvdr_Type=="Non-surgical Interventionalists" )
+#total providers in the period
+length(unique(spinal_set_other$Rndrng_NPI))
+
+spinal_set_other_sun <- spinal_set_other %>%
+  group_by(Year) %>%
+  summarize(Sum_Provider = length(unique(Rndrng_NPI)))
+
+summary(spinal_set_other_sun)
+
+```
+
+
+```{r eval=FALSE, include=FALSE}
+#Here are other codes broken down by specialty, change line 286 to include them in knit
+
+
+# Laminectomy (63047); 
+plot_5 <-subset(utilization_2021_2013_overview_by_provider_adjusted, HCPCS_Cd == 'Laminectomy'  )
+
+ggplot(plot_5, aes(x = Year, y = Sum_Utilization, color = Rndrng_Prvdr_Type)) +
+  geom_line() +
+  geom_point() +
+  geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Total Utilization") + labs(title = "Laminectomy trends over time by specialty") +  scale_x_continuous(n.breaks=9)
+
+# PLIF/TLIF (22630)
+plot_8 <-subset(utilization_2021_2013_overview_by_provider_adjusted, HCPCS_Cd == 'PLIF/TLIF'  )
+ggplot(plot_8, aes(x = Year, y = Sum_Utilization, color = Rndrng_Prvdr_Type)) +
+  geom_line() +
+  geom_point() +
+  geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Total Utilization") + labs(title = "PLIF/TLIF trends over time by specialty") +  scale_x_continuous(n.breaks=9)
+ 
+
+
+# tESI (64483) 
+
+plot_10 <-subset(utilization_2021_2013_overview_by_provider_adjusted, HCPCS_Cd == 'tESI'  )
+ggplot(plot_10, aes(x = Year, y = Sum_Utilization, color = Rndrng_Prvdr_Type)) +
+  geom_line() +
+  geom_point() +
+  geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Total Utilization") + labs(title = "tESI trends over time by specialty") +  scale_x_continuous(n.breaks=9)
+
+# Initial PT (97001); 
+plot_11 <-subset(utilization_2021_2013_overview_by_provider_adjusted, HCPCS_Cd == 'Initial PT'  )
+ggplot(plot_11, aes(x = Year, y = Sum_Utilization, color = Rndrng_Prvdr_Type)) +
+  geom_line() +
+  geom_point() +
+  geom_text_repel(aes(label = Sum_Utilization), size = 2) +
+  ylab("Total Utilization") + labs(title = "Initial PT trends over time by specialty") +  scale_x_continuous(n.breaks=9)
+
+```
+
+
