@@ -1,0 +1,7 @@
+processed-data/
+results/
+.DS_Store
+.ipynb_checkpoints/
+.virtual_documents/
+medicare-dataset/
+*.pptx
